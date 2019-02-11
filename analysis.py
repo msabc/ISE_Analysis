@@ -1,10 +1,9 @@
 import pandas as pd
 import matplotlib as plt
+import utils as ut
 
 # configuring plotting options
-#pd.options.display.mpl_style = 'default'
 plt.style.use('ggplot')
-#pd.set_option("display.mpl_style", 'default')
 
 # removing date from dataframe because we may not need it
 mainDataFrame = pd.read_csv("data_ise.csv",skiprows = [0], sep=",", usecols = [1,2,3,4,5,6,7,8,9])
@@ -55,13 +54,7 @@ print("State after removing rows with missing values: ")
 print(mainDataFrame.shape)
 print()
 
-# boxplot
-mainDataFrame.boxplot()
-
-# histogram
-mainDataFrame.hist(figsize=(10,7))
-
-print("***********Statistics: *************")
+print("***********STATISTICS: *************")
 print()
 print(mainDataFrame['NewYork_SP500'].describe())
 print()
@@ -77,4 +70,17 @@ print(mainDataFrame['EU'].describe())
 print()
 print(mainDataFrame['EM'].describe())
 print()
+
+print("***********PLOTTING: *************")
+ut.convert_columns_to_numeric(mainDataFrame)
+
+for col in mainDataFrame:
+    print(mainDataFrame[col].dtype)
+
+# boxplot
+mainDataFrame.boxplot()
+
+# histogram
+mainDataFrame.hist(figsize=(10,7), column = "TLira_ISE")
+mainDataFrame.hist(figsize=(10,7), column = "USD_ISE")
 
