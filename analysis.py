@@ -1,5 +1,5 @@
 import pandas as pd
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import utils as ut
 
 # configuring plotting options
@@ -81,5 +81,14 @@ print("***********PLOTTING: *************")
 # boxplot
 mainDataFrame.boxplot()
 
+# histogram
 # ut.histogram_foreach_column(mainDataFrame)
 
+plt.matshow(mainDataFrame.corr())
+
+print("***********CORRELATION: **************")
+print("*Feature: NewYork_SP500*")
+print()
+correlation_Array = ut.get_correlation_with_other_columns(mainDataFrame.NewYork_SP500,mainDataFrame)
+for item in correlation_Array:
+    print("Variable: {column}, correlation: {correlationAmount}".format(column = item[0], correlationAmount = item[1]))
