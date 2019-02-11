@@ -71,16 +71,15 @@ print()
 print(mainDataFrame['EM'].describe())
 print()
 
-print("***********PLOTTING: *************")
+# some series are interpreted as type object
+# so we re using a utility method to convert them all to float64's
 ut.convert_columns_to_numeric(mainDataFrame)
+print()
 
-for col in mainDataFrame:
-    print(mainDataFrame[col].dtype)
+print("***********PLOTTING: *************")
 
 # boxplot
 mainDataFrame.boxplot()
 
-# histogram
-mainDataFrame.hist(figsize=(10,7), column = "TLira_ISE")
-mainDataFrame.hist(figsize=(10,7), column = "USD_ISE")
+# ut.histogram_foreach_column(mainDataFrame)
 

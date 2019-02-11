@@ -4,3 +4,10 @@ def convert_columns_to_numeric(dataFrame: pd.DataFrame):
     for column in dataFrame:
         dataFrame[column] = pd.to_numeric(dataFrame[column])
         
+def histogram_foreach_column(dataFrame: pd.DataFrame, size = (10,7)):
+    for column in dataFrame:
+        dataFrame.hist(figsize=size, column = column)    
+        
+def get_types(dataFrame: pd.DataFrame):
+    for column in dataFrame:
+        print(column.dtype)
