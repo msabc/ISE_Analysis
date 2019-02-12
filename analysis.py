@@ -84,11 +84,27 @@ mainDataFrame.boxplot()
 # histogram
 # ut.histogram_foreach_column(mainDataFrame)
 
-plt.matshow(mainDataFrame.corr())
+# pausing the thread to make sure the plots paint themselves
+# before the correlation calculation
+plt.pause(0.25)
 
 print("***********CORRELATION: **************")
 print("*Feature: NewYork_SP500*")
 print()
-correlation_Array = ut.get_correlation_with_other_columns(mainDataFrame.NewYork_SP500,mainDataFrame)
+correlation_Array = ut.get_correlation_with_other_columns(mainDataFrame.NewYork_SP500, mainDataFrame)
+
+# sorting the array ASC by the correlation value
+correlation_Array.sort(key=lambda tup: tup[1], reverse = True)
+
 for item in correlation_Array:
     print("Variable: {column}, correlation: {correlationAmount}".format(column = item[0], correlationAmount = item[1]))
+
+# extracting the top 3 values
+top_three_correlation_values = []
+
+for i in range(0, 3):
+    top_three_correlation_values.append(correlation_Array[i][1])
+    
+# make a scatterplot here
+    
+

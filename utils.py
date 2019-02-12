@@ -20,3 +20,13 @@ def get_correlation_with_other_columns(correlationSubject: pd.Series, dataFrame:
         correlation = correlationSubject.corr(other = dataFrame[col])
         correlation_Array.append((col, correlation))
     return correlation_Array
+
+def get_N_largest_numbers(arr, n):
+    final_list = [] 
+    for i in range(0, n):  
+        max1 = 0
+        for j in range(len(arr)):      
+            if arr[j] > max1: 
+                max1 = arr[j] 
+        arr.remove(max1) 
+        final_list.append(max1) 
