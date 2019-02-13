@@ -1,5 +1,10 @@
 import pandas as pd
 import numpy as np
+import matplotlib.cm as cm
+
+def generate_colors(n:int):
+    colors = cm.rainbow(np.linspace(0, 1, n))
+    return colors
 
 def convert_columns_to_numeric(dataFrame: pd.DataFrame):
     for column in dataFrame:
@@ -57,4 +62,31 @@ def remove_outliers(dataFrame: pd.DataFrame):
         newDataFrame.insert(loc = columnIndexer, value = newSeries, column = newSeries.name)
         columnIndexer += 1
     return newDataFrame
-        
+
+def calc_iv(df, feature: str, target: str, print_output=0):
+    
+    if df.empty or not feature or not target:
+        return None
+    
+    lst = []
+
+    # iterating over distinct values of a feature column
+    for i in range(df[feature].nunique()):
+        # getting the specific value
+        val = list(df[feature].unique())[i]
+        lst.append([feature, val, df[df[feature] == val].count()[feature], df[(df[feature] == val) & (df[target] == 1)].count()[feature]])
+
+    data = pd.DataFrame(lst, columns=['Variable', 'Value', 'All', 'Bad'])
+    data = data[data['Bad'] > 0]
+
+    data['Share'] = data['All'] / data['All'].sum()
+    data['Bad Rate'] = data['Bad'] / data['All']
+    data['Distribution Good'] = (data['All'] - data['Bad']) / (data['All'].sum() - data['Bad'].sum())
+    data['Distribution Bad'] = data['Bad'] / data['Bad'].sum()
+    data['WoE'] = np.log(data['Distribution Good'] / data['Distribution Bad'])
+    data['IV'] = (data['WoE'] * (data['Distribution Good'] - data['Distribution Bad'])).sum()
+
+    data = data.sort_values(by=['Variable', 'Value'], ascending=True)
+
+    if print_output == 1:
+        print(data)
