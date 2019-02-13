@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import utils as ut
+from scipy.stats import kurtosis, skew
 
 # configuring plotting options
 plt.style.use('ggplot')
@@ -55,6 +56,7 @@ print(mainDataFrame.shape)
 print()
 
 print("***********STATISTICS: *************")
+print("*Feature: NewYork_SP500*")
 print()
 print(mainDataFrame['NewYork_SP500'].describe())
 print()
@@ -77,7 +79,7 @@ ut.convert_columns_to_numeric(mainDataFrame)
 print()
 
 print("***********PLOTTING: *************")
-
+print("*Feature: NewYork_SP500*")
 # boxplot
 mainDataFrame.boxplot()
 
@@ -99,12 +101,22 @@ correlation_Array.sort(key=lambda tup: tup[1], reverse = True)
 for item in correlation_Array:
     print("Variable: {column}, correlation: {correlationAmount}".format(column = item[0], correlationAmount = item[1]))
 
-# extracting the top 3 values
-top_three_correlation_values = []
+print()
 
-for i in range(0, 3):
-    top_three_correlation_values.append(correlation_Array[i][1])
-    
 # make a scatterplot here
-    
+
+# check is the payoff of removing outliers and NaN's worth it
+#newFrame = ut.remove_outliers(mainDataFrame)
+#print(newFrame.head(5))
+#print(newFrame.tail(5))
+
+print("***********SKEWNESS: **************")
+print("*Feature: NewYork_SP500*")
+print("ALPHA3 equals: " + str(skew(mainDataFrame.NewYork_SP500)) + "=> distribution is approximately symmetric")
+print()
+
+print("***********KURTOSIS: **************")
+print("*Feature: NewYork_SP500*")
+print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) + "=> distribution is very close to the Bell curve")
+print()
 

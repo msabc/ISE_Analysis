@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def convert_columns_to_numeric(dataFrame: pd.DataFrame):
     for column in dataFrame:
@@ -30,3 +31,30 @@ def get_N_largest_numbers(arr, n):
                 max1 = arr[j] 
         arr.remove(max1) 
         final_list.append(max1) 
+        
+def get_outliers(data_1):
+    outliers=[]
+    threshold=3
+    mean_1 = np.mean(data_1)
+    std_1 =np.std(data_1)
+    
+    for y in data_1:
+        z_score= (y - mean_1)/std_1 
+        if np.abs(z_score) > threshold:
+            outliers.append(y)
+    return outliers
+
+def remove_outliers(dataFrame: pd.DataFrame):
+    newDataFrame = pd.DataFrame()
+    columnIndexer = 0
+    for column in dataFrame:
+        col = dataFrame[column]
+        seriesName = col.name
+        col_value_array = col.values.flatten().tolist()
+        for outlier in get_outliers(col_value_array):
+            col_value_array.remove(outlier)
+        newSeries = pd.Series(data = col_value_array, name = seriesName)
+        newDataFrame.insert(loc = columnIndexer, value = newSeries, column = newSeries.name)
+        columnIndexer += 1
+    return newDataFrame
+        
