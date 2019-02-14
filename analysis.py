@@ -2,6 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import utils as ut
 from scipy.stats import kurtosis, skew
+from sklearn import linear_model
+from sklearn.metrics import mean_squared_error, r2_score
 #from matplotlib.pyplot import figure
 
 import pylab
@@ -23,8 +25,10 @@ print("Columns: " + str(dfshape[1]))
 print()
 
 print(mainDataFrame.info())
-
-#print(mainDataFrame.columns[0] > 100)
+print("Dependent variable: NewYork_SP500")
+print("Independent variable: BOVESPA")
+print("Independent variable: DAX")
+print("Independent variable: EU")
 print()
 
 # replacing all 0's with 'missing'
@@ -97,10 +101,11 @@ print()
 plt.pause(1)
 
 # scatter
-print("*********** SCATTER PLOTS: **************")
+print("*********** SCATTER PLOT: (NewYork_SP500, BOVESPA, DAX, EU) **************")
 pylab.scatter(mainDataFrame.NewYork_SP500.index, mainDataFrame.NewYork_SP500)
-pylab.scatter(mainDataFrame.FTSE.index, mainDataFrame.FTSE)
-pylab.scatter(mainDataFrame.EM.index, mainDataFrame.EM)
+pylab.scatter(mainDataFrame.BOVESPA.index, mainDataFrame.BOVESPA)
+pylab.scatter(mainDataFrame.DAX.index, mainDataFrame.DAX)
+pylab.scatter(mainDataFrame.EU.index, mainDataFrame.EU)
     
 # pausing the thread to make sure the plots paint themselves
 # before the correlation calculation
@@ -135,3 +140,33 @@ print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) + " => dist
 print()
 
 # ut.calc_iv(mainDataFrame, 'FTSE', 'NewYork_SP500', 1)
+
+print("*********** LINEAR REGRESSION: **************")
+
+# splitting the targets into training and testing data sets
+complete_NY_series = mainDataFrame.NewYork_SP500.values
+complete_EU_series = mainDataFrame.EU.values
+train_X = complete_EU_series[:30].reshape(-1,1)
+train_Y = complete_NY_series[:30].reshape(-1,1)
+
+test_X = complete_EU_series[30:].reshape(-1,1)
+test_Y = complete_NY_series[30:].reshape(-1,1)
+
+# training
+linear_regression = linear_model.LinearRegression()
+linear_regression.fit(train_X, train_Y)
+
+# testing the model
+prediction_NY = linear_regression.predict(test_X)
+
+# checking the result statistics
+print("Coefficients: ")
+print(linear_regression.coef_)
+
+# The mean squared error
+print("Mean squared error: ")
+print(mean_squared_error(test_Y, prediction_NY))
+      
+# Explained variance score: 1 is perfect prediction
+print("Variance score: ")
+print(r2_score(test_Y, prediction_NY))
