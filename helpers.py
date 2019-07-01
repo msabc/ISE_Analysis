@@ -23,6 +23,7 @@ def get_correlation_with_other_columns(correlationSubject: pd.Series, dataFrame:
     for col in dataFrame:
         if col == correlationSubject.name:
             continue
+        # pearson by default
         correlation = correlationSubject.corr(other = dataFrame[col])
         correlation_Array.append((col, correlation))
     return correlation_Array
@@ -90,3 +91,58 @@ def calc_iv(df, feature: str, target: str, print_output=0):
 
     if print_output == 1:
         print(data)
+
+def bin_numeric_series(s1: pd.Series, s2: pd.Series, percentage: int):
+    if percentage <= 0 | percentage >= 100:
+        return
+    
+    # exit function if the number of values in both series is not equal
+    if(len(s1.values) != len(s2.values)):
+        return
+    
+    # calculate bin size
+    bin_size = len(s1.values) / percentage
+    series_size = len(s1.values)
+    leftovers = 0
+    
+    # final bin will have more elements based on whether or not the
+    # next operations is true or not
+    if (series_size % bin_size) != 0:
+        leftovers = series_size % bin_size
+    
+    num_of_bins = series_size / bin_size
+    last_bin_number = num_of_bins - 1
+    bins = []
+    
+    for i in range (0, num_of_bins):
+        
+        simple_bin = []
+        
+        for j in range (0, bin_size):
+            value_tuple = ()
+            value_tuple[0] = s1.values[j*i + i]
+            value_tuple[1] = s2.values[j*i + i]
+            simple_bin.append(value_tuple)
+            
+        bins.append(simple_bin)
+        
+        if leftovers > 0 & last_bin_number > 0: 
+            if i == last_bin_number:
+                for j in range (0, leftovers):
+                    value_tuple = ()
+                    value_tuple[0] = s1.values[j*i + i]
+                    value_tuple[1] = s2.values[j*i + i]
+                    simple_bin.append(value_tuple)
+            
+        bins.append(simple_bin)
+        
+    return bins
+        
+def get_bin(startIndex: int, endIndex: int, s1: pd.Series, s2: pd.Series):
+    simple_bin = []
+    for i in range (startIndex, endIndex):
+        value_tuple = ()
+        value_tuple[0] = s1.values[i]
+        value_tuple[1] = s2.values[i]
+        simple_bin.append(value_tuple)
+    return simple_bin
