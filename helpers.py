@@ -148,3 +148,16 @@ def get_bin(startIndex: int, endIndex: int, s1: pd.Series, s2: pd.Series):
         value_tuple[1] = s2.values[i]
         simple_bin.append(value_tuple)
     return simple_bin
+
+def group_zscores(zscore_arr):
+    less_than_minus_three = []
+    between_minus_three_and_three = []
+    greater_than_three = []
+    for i in zscore_arr:
+        if (i < -3):
+            less_than_minus_three.append(i)
+        elif (i > -3 and i < 3):
+            between_minus_three_and_three.append(i)
+        else:
+            greater_than_three.append(i)
+    return (less_than_minus_three, between_minus_three_and_three, greater_than_three)

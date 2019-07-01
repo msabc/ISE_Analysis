@@ -143,10 +143,24 @@ print("Z-score: ")
 zscore_array_new_york_index = zscore(mainDataFrame[NEW_YORK_INDEX])
 zscore_array_germany_index = zscore(mainDataFrame[GERMANY_INDEX])
 zscore_array_uk_index = zscore(mainDataFrame[UK_INDEX])
-zscore_array_japan_york_index = zscore(mainDataFrame[JAPAN_INDEX])
+zscore_array_japan_index = zscore(mainDataFrame[JAPAN_INDEX])
 zscore_array_brazil_index = zscore(mainDataFrame[BRAZIL_INDEX])
 zscore_array_eu_index = zscore(mainDataFrame[EU_INDEX])
 zscore_array_em_index = zscore(mainDataFrame[EM_INDEX])
+
+zscore_group_new_york_index = ut.group_zscores(zscore_array_new_york_index);
+zscore_group_germany_index = ut.group_zscores(zscore_array_germany_index);
+zscore_group_uk_index = ut.group_zscores(zscore_array_uk_index);
+zscore_group_japan_index = ut.group_zscores(zscore_array_japan_index);
+zscore_group_brazil_index = ut.group_zscores(zscore_array_brazil_index);
+zscore_group_eu_index = ut.group_zscores(zscore_array_eu_index);
+zscore_group_em_index = ut.group_zscores(zscore_array_em_index);
+
+print(NEW_YORK_INDEX)
+print('Less than -3 for New York: ' + str(len(zscore_group_new_york_index[0])))
+print('Between -3 and 3 for New York: ' + str(len(zscore_group_new_york_index[1])))
+print('Greater than 3 for New York: ' + str(len(zscore_group_new_york_index[2])))
+print()
 
 sys.exit()
 print()
