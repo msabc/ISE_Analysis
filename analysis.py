@@ -113,8 +113,8 @@ print()
 
 # at this point some series are interpreted as type object 
 # even though the result of describe method says float64,
-# so we re using a utility method to convert them all to float64's
-ut.convert_columns_to_numeric(mainDataFrame)
+# so we're using a utility method to convert them all to float64's
+mainDataFrame = ut.convert_columns_to_numeric(mainDataFrame)
 
 print("*********** STATISTICS: *************")
 print("Feature: " + NEW_YORK_INDEX)

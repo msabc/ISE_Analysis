@@ -7,8 +7,10 @@ def generate_colors(n:int):
     return colors
 
 def convert_columns_to_numeric(dataFrame: pd.DataFrame):
-    for column in dataFrame:
-        dataFrame[column] = pd.to_numeric(dataFrame[column])
+    newDataFrame = dataFrame
+    for column in newDataFrame:
+        newDataFrame[column] = pd.to_numeric(newDataFrame[column])
+    return newDataFrame
         
 def histogram_foreach_column(dataFrame: pd.DataFrame, size = (10,7)):
     for column in dataFrame:
