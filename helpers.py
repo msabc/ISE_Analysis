@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.cm as cm
+from scipy.stats import zscore
 
 def generate_colors(n:int):
     colors = cm.rainbow(np.linspace(0, 1, n))
@@ -161,3 +162,13 @@ def group_zscores(zscore_arr):
         else:
             greater_than_three.append(i)
     return (less_than_minus_three, between_minus_three_and_three, greater_than_three)
+
+def generate_zscore_groups(dataFrame: pd.DataFrame):
+    zscore_data_array = []
+    zscore_groups = []
+    dataframe_series_names = []
+    for column in dataFrame:
+        zscore_data_array.append(zscore(dataFrame[column]))
+        dataframe_series_names.append(column)
+    for i in range(len(zscore_data_array)):
+        zscore_groups.append({'name': dataframe_series_names[i], 'group': group_zscores(zscore_data_array[i])})

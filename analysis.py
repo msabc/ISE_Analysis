@@ -140,29 +140,22 @@ print("Z-score: ")
 
 # if a z-score is negative, its' corresponding value is lower than the mean 
 # (on the left side)
-zscore_array_new_york_index = zscore(mainDataFrame[NEW_YORK_INDEX])
-zscore_array_germany_index = zscore(mainDataFrame[GERMANY_INDEX])
-zscore_array_uk_index = zscore(mainDataFrame[UK_INDEX])
-zscore_array_japan_index = zscore(mainDataFrame[JAPAN_INDEX])
-zscore_array_brazil_index = zscore(mainDataFrame[BRAZIL_INDEX])
-zscore_array_eu_index = zscore(mainDataFrame[EU_INDEX])
-zscore_array_em_index = zscore(mainDataFrame[EM_INDEX])
 
-zscore_group_new_york_index = ut.group_zscores(zscore_array_new_york_index);
-zscore_group_germany_index = ut.group_zscores(zscore_array_germany_index);
-zscore_group_uk_index = ut.group_zscores(zscore_array_uk_index);
-zscore_group_japan_index = ut.group_zscores(zscore_array_japan_index);
-zscore_group_brazil_index = ut.group_zscores(zscore_array_brazil_index);
-zscore_group_eu_index = ut.group_zscores(zscore_array_eu_index);
-zscore_group_em_index = ut.group_zscores(zscore_array_em_index);
+# a zscore_groups represents a data of the following format:
+# zscore_group[0]['name'] is the name of the first Series
+# zscore_group[0]['group'] is a an array of 3 elements of the following format:
+# zscore_group[0]['group'][0] are zscores for a specific series with a value less than -3
+# zscore_group[0]['group'][1] are zscores for a specific series with a value between -3 and 3
+# zscore_group[0]['group'][2] are zscores for a specific series with a value greater than 3
+zscore_groups = ut.generate_zscore_groups(mainDataFrame)
 
-print(NEW_YORK_INDEX)
-print('Less than -3 for New York: ' + str(len(zscore_group_new_york_index[0])))
-print('Between -3 and 3 for New York: ' + str(len(zscore_group_new_york_index[1])))
-print('Greater than 3 for New York: ' + str(len(zscore_group_new_york_index[2])))
-print()
+for i in range(len(zscore_groups)):
+    print(zscore_groups[i]['name'])
+    print('Number of values less than -3: ' + str(len(zscore_groups[i]['group'][0])))
+    print('Number of values between 3 and -3: ' + str(len(zscore_groups[i]['group'][1])))
+    print('Number of values greater than 3: ' + str(len(zscore_groups[i]['group'][2])))
+    print()
 
-sys.exit()
 print()
 
 if plotting_enabled:
