@@ -172,3 +172,4 @@ def generate_zscore_groups(dataFrame: pd.DataFrame):
         dataframe_series_names.append(column)
     for i in range(len(zscore_data_array)):
         zscore_groups.append({'name': dataframe_series_names[i], 'group': group_zscores(zscore_data_array[i])})
+    return zscore_groups
