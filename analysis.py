@@ -44,7 +44,10 @@ plt.style.use('ggplot')
 # [0] date 
 # [1] ISE (Turkish Lira) 
 # [2] ISE (USD) 
-mainDataFrame = pd.read_csv("data_ise.csv",skiprows = [0], sep=",", usecols = [3,4,5,6,7,8,9])
+mainDataFrame = pd.read_csv("data_ise.csv",
+                            skiprows = [0], 
+                            sep=",", 
+                            usecols = [3,4,5,6,7,8,9])
 
 # enables giving custom names to columns
 mainDataFrame.columns = [NEW_YORK_INDEX, 
@@ -194,7 +197,8 @@ correlation_Array = ut.get_correlation_with_other_columns(mainDataFrame.NewYork_
 correlation_Array.sort(key=lambda tup: tup[1], reverse = True)
 
 for item in correlation_Array:
-    print("Variable: {column}, correlation: {correlationAmount}".format(column = item[0], correlationAmount = item[1]))
+    print("Variable: {column}, correlation: {correlationAmount}"
+          .format(column = item[0], correlationAmount = item[1]))
 
 print()
 
@@ -206,19 +210,21 @@ print()
 
 print("*********** SKEWNESS: **************")
 print("*Feature: NewYork_SP500*")
-print("ALPHA3 equals: " + str(skew(mainDataFrame.NewYork_SP500)) + " => distribution is approximately symmetric")
+print("ALPHA3 equals: " + str(skew(mainDataFrame.NewYork_SP500)) + 
+      " => distribution is approximately symmetric")
 print()
 
 print("*********** KURTOSIS: **************")
 print("*Feature: NewYork_SP500*")
-print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) + " => distribution is very close to the Bell curve")
+print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) + 
+      " => distribution is very close to the Bell curve")
 print()
 
+sys.exit()
 #ut.calc_iv(mainDataFrame, 'FTSE', 'NewYork_SP500', 1)
 print("*********** INFORMATION VALUE: **************")
 print("Variable: BOVESPA")
 print()
-sys.exit()
 
 s_NewYork = mainDataFrame.NewYork_SP500.sort_values(ascending=True)
 s_BOVESPA = mainDataFrame.BOVESPA.sort_values(ascending=True)

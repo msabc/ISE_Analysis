@@ -173,3 +173,64 @@ def generate_zscore_groups(dataFrame: pd.DataFrame):
     for i in range(len(zscore_data_array)):
         zscore_groups.append({'name': dataframe_series_names[i], 'group': group_zscores(zscore_data_array[i])})
     return zscore_groups
+
+def bin_numeric_series2(s1: pd.Series, number_of_bins: int):
+    series_size = len(s1.values)
+    bin_size = 0
+    leftover_data = []
+    leftover_size = 0
+    
+    # check the series data type
+    if(s1.dtype != 'int'):
+        raise ValueError('Series data type is not an integer.')
+        
+    # if the method is given an array of 5 and
+    # asked to bin it into 7 bins
+    # raise an error
+    if(number_of_bins > series_size):
+        raise ValueError('Number of bins cannot be greater than the number of values inside the Series.')
+    
+    # sort the values inside the Series
+    s1.sort_values(inplace=True)
+    # reset index after sorting and dont keep it as a column
+    s1 = s1.reset_index(drop=True)
+    
+    bin_size = series_size // number_of_bins
+    # final bin will have more elements based on whether or not the
+    # next operations is true or not
+    if (series_size % number_of_bins) != 0:
+        leftover_size = series_size % number_of_bins
+        print('leftover size:' + str(leftover_size))
+        restoration_index = number_of_bins * bin_size
+        bin_size = bin_size + 1
+        print('restoration_index' + str(restoration_index))
+        
+    # floored division
+    
+    bins = []
+    
+    for i in range (0, number_of_bins):
+        simple_bin = []
+        for j in range (0, bin_size):
+            simple_bin.append(s1.values[j*i + i])
+        bins.append(simple_bin)
+    
+#    if leftover_size > 0: 
+#        simple_bin = []
+#        for i in range (0, leftover_size):
+#              simple_bin.append(s1.values[j*i + i])
+#                    
+    return bins
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
