@@ -67,33 +67,37 @@ def remove_outliers(dataFrame: pd.DataFrame):
         columnIndexer += 1
     return newDataFrame
 
-def calc_iv(df, feature: str, target: str, print_output=0):
+def get_binned_tuple_of_series(s1: pd.Series, s2: pd.Series):
+    num_of_bins = 10
+    bins_s1 = get_bins(s1.values, num_of_bins)
+    bins_s2 = get_bins(s2.values, num_of_bins)
     
-    if df.empty or not feature or not target:
-        return None
+    # raise an error if the number of bins is not equal between Series
+    if(len(bins_s1) != len(bins_s2)):
+        raise ValueError('Number of bins between Series is different.')
     
-    lst = []
-
-    # iterating over distinct values of a feature column
-    for i in range(df[feature].nunique()):
-        # getting the specific value
-        val = list(df[feature].unique())[i]
-        lst.append([feature, val, df[df[feature] == val].count()[feature], df[(df[feature] == val) & (df[target] == 1)].count()[feature]])
-
-    data = pd.DataFrame(lst, columns=['Variable', 'Value', 'All', 'Bad'])
-    data = data[data['Bad'] > 0]
-
-    data['Share'] = data['All'] / data['All'].sum()
-    data['Bad Rate'] = data['Bad'] / data['All']
-    data['Distribution Good'] = (data['All'] - data['Bad']) / (data['All'].sum() - data['Bad'].sum())
-    data['Distribution Bad'] = data['Bad'] / data['Bad'].sum()
-    data['WoE'] = np.log(data['Distribution Good'] / data['Distribution Bad'])
-    data['IV'] = (data['WoE'] * (data['Distribution Good'] - data['Distribution Bad'])).sum()
-
-    data = data.sort_values(by=['Variable', 'Value'], ascending=True)
-
-    if print_output == 1:
-        print(data)
+    # check if the number of data inside the last bin
+    # is different between the Series: 
+    # if true remove last bin (unoptimized)
+    if(bins_s1[len(bins_s1) - 1] != bins_s2[len(bins_s2) - 1]):
+        bins_s1.pop()
+        bins_s2.pop()
+    
+    number_of_bins = len(bins_s1)
+    
+    tuple_collection = []
+    for i in range(0, number_of_bins):
+        for j in range(0, bins_s1):
+            first_bin_value = bins_s1[i][j]
+            second_bin_value = bins_s2[i][j]
+            
+            if((first_bin_value > 0 and second_bin_value > 0) or (first_bin_value < 0 and second_bin_value < 0)):
+                value_tuple = (first_bin_value, second_bin_value, 'Yes')
+            else:
+                value_tuple = (first_bin_value, second_bin_value, 'No')
+            tuple_collection.append(value_tuple)
+    
+    return tuple_collection
 
 def group_zscores(zscore_arr):
     less_than_minus_three = []
