@@ -79,15 +79,15 @@ def get_binned_tuple_of_series(s1: pd.Series, s2: pd.Series):
     # check if the number of data inside the last bin
     # is different between the Series: 
     # if true remove last bin (unoptimized)
-    if(bins_s1[len(bins_s1) - 1] != bins_s2[len(bins_s2) - 1]):
+    if(len(bins_s1[len(bins_s1) - 1]) != len(bins_s2[len(bins_s2) - 1])):
         bins_s1.pop()
         bins_s2.pop()
     
     number_of_bins = len(bins_s1)
-    
     tuple_collection = []
+    
     for i in range(0, number_of_bins):
-        for j in range(0, bins_s1):
+        for j in range(0, len(bins_s1[i])):
             first_bin_value = bins_s1[i][j]
             second_bin_value = bins_s2[i][j]
             
@@ -131,9 +131,22 @@ def __yield_bins(arr, number_of_bins):
     for i in range(0, len(arr), bin_size):
         yield arr[i:i + bin_size]
     
+def convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection):
+    s1_values = []
+    s2_values = []
+    churn_nonchurn_values = []
     
+    for i in range(0, len(binned_tuple_collection)):
+        s1_values.append(binned_tuple_collection[i][0])
+        s2_values.append(binned_tuple_collection[i][1])
+        churn_nonchurn_values.append(binned_tuple_collection[i][2])
     
+    s1 = pd.Series(s1_values)
+    s2 = pd.Series(s2_values)
+    s3 = pd.Series(churn_nonchurn_values)
     
+    frame = { 'Series_1': s1, 'Series_2': s2, 'Churn': s3} 
+    return pd.DataFrame(frame) 
     
     
     

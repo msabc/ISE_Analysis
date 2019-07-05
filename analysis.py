@@ -204,9 +204,9 @@ print()
 
 # TODO: check if the payoff of removing outliers and NaN's is worth it
 # considering we lose a significant amount of data
-#newFrame = ut.remove_outliers(mainDataFrame)
-#print(newFrame.head(5))
-#print(newFrame.tail(5))
+#mainDataFrame = ut.remove_outliers(mainDataFrame)
+#print(mainDataFrame.head(5))
+#print(mainDataFrame.tail(5))
 
 print("*********** SKEWNESS: **************")
 print("*Feature: NewYork_SP500*")
@@ -220,17 +220,7 @@ print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) +
       " => distribution is very close to the Bell curve")
 print()
 
-sys.exit()
-#ut.calc_iv(mainDataFrame, 'FTSE', 'NewYork_SP500', 1)
-print("*********** INFORMATION VALUE: **************")
-print("Variable: BOVESPA")
-print()
-
-s_NewYork = mainDataFrame.NewYork_SP500.sort_values(ascending=True)
-s_BOVESPA = mainDataFrame.BOVESPA.sort_values(ascending=True)
-print(s_NewYork.head(5))
-print(s_BOVESPA.head(5))
-
-print(len(s_NewYork.values))
-print(len(s_BOVESPA.values))
-#bins = ut.bin_numeric_series(s_NewYork,s_BOVESPA)
+binned_tuple_collection = ut.get_binned_tuple_of_series(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
+newdf = ut.convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection)
+yes_series = newdf['Churn'].where(lambda cell : cell == 'Yes').dropna()
+print(len(yes_series.values))
