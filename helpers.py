@@ -96,7 +96,9 @@ def generate_zscore_groups(dataFrame: pd.DataFrame):
 
 def generate_iv_df(s1: pd.Series, s2: pd.Series):
     newDf = create_intermediary_iv_df(s1, s2)
-    print(newDf)
+    non_events = newDf['Non events']
+    total = non_events.sum()
+    print(total)
 
 # Information Value and Weight of Evidence
 def create_intermediary_iv_df(s1: pd.Series, s2: pd.Series):
