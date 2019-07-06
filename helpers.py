@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.cm as cm
 from scipy.stats import zscore
 
+# General
 def generate_colors(n:int):
     colors = cm.rainbow(np.linspace(0, 1, n))
     return colors
@@ -40,7 +41,8 @@ def get_N_largest_numbers(arr, n):
                 max1 = arr[j] 
         arr.remove(max1) 
         final_list.append(max1) 
-        
+
+# Outliers    
 def get_outliers(data_1):
     outliers=[]
     threshold=3
@@ -67,38 +69,7 @@ def remove_outliers(dataFrame: pd.DataFrame):
         columnIndexer += 1
     return newDataFrame
 
-def get_binned_tuple_of_series(s1: pd.Series, s2: pd.Series):
-    num_of_bins = 10
-    bins_s1 = get_bins(s1.values, num_of_bins)
-    bins_s2 = get_bins(s2.values, num_of_bins)
-    
-    # raise an error if the number of bins is not equal between Series
-    if(len(bins_s1) != len(bins_s2)):
-        raise ValueError('Number of bins between Series is different.')
-    
-    # check if the number of data inside the last bin
-    # is different between the Series: 
-    # if true remove last bin (unoptimized)
-    if(len(bins_s1[len(bins_s1) - 1]) != len(bins_s2[len(bins_s2) - 1])):
-        bins_s1.pop()
-        bins_s2.pop()
-    
-    number_of_bins = len(bins_s1)
-    tuple_collection = []
-    
-    for i in range(0, number_of_bins):
-        for j in range(0, len(bins_s1[i])):
-            first_bin_value = bins_s1[i][j]
-            second_bin_value = bins_s2[i][j]
-            
-            if((first_bin_value > 0 and second_bin_value > 0) or (first_bin_value < 0 and second_bin_value < 0)):
-                value_tuple = (first_bin_value, second_bin_value, 'Yes')
-            else:
-                value_tuple = (first_bin_value, second_bin_value, 'No')
-            tuple_collection.append(value_tuple)
-    
-    return tuple_collection
-
+# Z Score
 def group_zscores(zscore_arr):
     less_than_minus_three = []
     between_minus_three_and_three = []
@@ -123,6 +94,75 @@ def generate_zscore_groups(dataFrame: pd.DataFrame):
         zscore_groups.append({'name': dataframe_series_names[i], 'group': group_zscores(zscore_data_array[i])})
     return zscore_groups
 
+def generate_iv_df(s1: pd.Series, s2: pd.Series):
+    newDf = create_intermediary_iv_df(s1, s2)
+    print(newDf)
+
+# Information Value and Weight of Evidence
+def create_intermediary_iv_df(s1: pd.Series, s2: pd.Series):
+    binned_tuple_collection = get_binned_tuple_of_series(s1, s2)
+    df = convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection)
+    num_of_bins = len(df['Bin Number'].unique())
+    
+    bins = []
+    non_events = []
+    events = []
+    for i in range (0, num_of_bins):
+        bool_extract_bin_number = df['Bin Number'] == i
+        newDf = df[bool_extract_bin_number]
+        total_num_rows = newDf.shape[0]
+        churn_number = len(newDf['Churn'].where(lambda x : x == 'Yes').dropna())
+        non_churn_number = total_num_rows - churn_number
+        
+        bins.append(i)
+        non_events.append(non_churn_number)
+        events.append(churn_number)
+        
+    bin_series = pd.Series(bins)
+    non_events_series = pd.Series(non_events)
+    events_series = pd.Series(events)
+    
+    frame = { 'Bin Number': bin_series, 
+             'Non events': non_events_series, 
+             'Events': events_series} 
+    
+    return pd.DataFrame(frame)
+
+def get_binned_tuple_of_series(s1: pd.Series, s2: pd.Series):
+    num_of_bins = 10
+    bins_s1 = get_bins(s1.values, num_of_bins)
+    bins_s2 = get_bins(s2.values, num_of_bins)
+    
+    # raise an error if the number of bins is not equal between Series
+    if(len(bins_s1) != len(bins_s2)):
+        raise ValueError('Number of bins between Series is different.')
+    
+    # check if the number of data inside the last bin
+    # is different between the Series: 
+    # if true remove last bin (unoptimized)
+    if(len(bins_s1[len(bins_s1) - 1]) != len(bins_s2[len(bins_s2) - 1])):
+        bins_s1.pop()
+        bins_s2.pop()
+    
+    number_of_bins = len(bins_s1)
+    tuple_collection = []
+    
+    for i in range(0, number_of_bins):
+        for j in range(0, len(bins_s1[i])):
+            bin_number = i
+            first_bin_value = bins_s1[i][j]
+            second_bin_value = bins_s2[i][j]
+            
+            if((first_bin_value > 0 and second_bin_value > 0) or (first_bin_value < 0 and second_bin_value < 0)):
+                value_tuple = (bin_number, first_bin_value, second_bin_value, 'Yes')
+            else:
+                value_tuple = (bin_number, first_bin_value, second_bin_value, 'No')
+            tuple_collection.append(value_tuple)
+    
+    return tuple_collection
+
+
+
 def get_bins(arr, number_of_bins):
     return list(__yield_bins(arr, number_of_bins))
 
@@ -131,24 +171,27 @@ def __yield_bins(arr, number_of_bins):
     for i in range(0, len(arr), bin_size):
         yield arr[i:i + bin_size]
     
+# If anything is changed in the algorithm that creates the binned_tuple_collection,
+# those changes need to be reflected here also.
 def convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection):
+    bin_number_values = []
     s1_values = []
     s2_values = []
     churn_nonchurn_values = []
     
     for i in range(0, len(binned_tuple_collection)):
-        s1_values.append(binned_tuple_collection[i][0])
-        s2_values.append(binned_tuple_collection[i][1])
-        churn_nonchurn_values.append(binned_tuple_collection[i][2])
+        bin_number_values.append(binned_tuple_collection[i][0])
+        s1_values.append(binned_tuple_collection[i][1])
+        s2_values.append(binned_tuple_collection[i][2])
+        churn_nonchurn_values.append(binned_tuple_collection[i][3])
     
+    bin_num_vals = pd.Series(bin_number_values)
     s1 = pd.Series(s1_values)
     s2 = pd.Series(s2_values)
     s3 = pd.Series(churn_nonchurn_values)
     
-    frame = { 'Series_1': s1, 'Series_2': s2, 'Churn': s3} 
+    frame = { 'Bin Number': bin_num_vals, 'Series_1': s1, 'Series_2': s2, 'Churn': s3} 
     return pd.DataFrame(frame) 
-    
-    
     
     
     

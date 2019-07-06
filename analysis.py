@@ -220,7 +220,8 @@ print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) +
       " => distribution is very close to the Bell curve")
 print()
 
-binned_tuple_collection = ut.get_binned_tuple_of_series(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
-newdf = ut.convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection)
-yes_series = newdf['Churn'].where(lambda cell : cell == 'Yes').dropna()
-print(len(yes_series.values))
+ut.generate_iv_df(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
+#binned_tuple_collection = ut.get_binned_tuple_of_series(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
+#newdf = ut.convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection)
+#yes_series = newdf['Churn'].where(lambda cell : cell == 'Yes').dropna()
+#print(len(yes_series.values))
