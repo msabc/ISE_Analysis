@@ -15,6 +15,7 @@ CONST_woe = 'WOE'
 CONST_iv = 'IV'
 CONST_y = 'Yes'
 CONST_n = 'No'
+CONST_zero_division_floor = 0.0001
 
 # General
 def generate_colors(n:int):
@@ -54,7 +55,7 @@ def get_N_largest_numbers(arr, n):
                 max1 = arr[j] 
         arr.remove(max1) 
         final_list.append(max1) 
-
+        
 # Outliers    
 def get_outliers(data_1):
     outliers=[]
@@ -110,7 +111,37 @@ def generate_zscore_groups(dataFrame: pd.DataFrame):
                 })
     return zscore_groups
 
-# Information Value and Weight of Evidence
+# Information Value and Weight of Evidence, followed this article:
+# https://www.listendata.com/2015/03/weight-of-evidence-woe-and-information.html
+    
+def group_predictive_pw(val):
+    if(val < 0.02):
+        return 'Not useful'
+    elif(val > 0.02 and val < 0.1):
+        return 'Weak'
+    elif(val > 0.1 and val < 0.3):
+        return 'Medium'
+    elif(val > 0.3 and val < 0.5):
+        return 'Strong'
+    elif(val > 0.5):
+        return 'Suspicious'
+    else:
+        return 'Undefined'
+    
+def print_iv_data(df: pd.DataFrame, dependentVariableName): 
+    iv_arr = []
+    for column in df:
+        if(column != dependentVariableName):
+            print("Independent variable: " + column)
+            iv_tuple = generate_iv_df(df[dependentVariableName], df[column])
+            print(iv_tuple[0])
+            print('Information value for ' + column +': ' + str(iv_tuple[1]))
+            print()
+            iv_arr.append((column, iv_tuple[1]))
+    
+    for i in range(0, len(iv_arr)):
+        print(iv_arr[i][0] + ': ' + str(iv_arr[i][1]) + '| Predicitive power: ' + group_predictive_pw(iv_arr[i][1]))
+
 def generate_iv_df(s1: pd.Series, s2: pd.Series):
     newDf = create_intermediary_iv_df(s1, s2)
     bin_num = newDf[CONST_bin_number]
@@ -134,8 +165,15 @@ def generate_iv_df(s1: pd.Series, s2: pd.Series):
         curr_event_num = events.values[i]
         pct_event = curr_event_num / total_events
         pct_events.append(pct_event)
+        woe_val = 0
         
-        woe_val = np.log(pct_non_event / pct_event)
+        pct_event_division = pct_non_event / pct_event
+        
+        if (pct_event_division == 0):
+            woe_val = 0
+        else:
+            woe_val = np.log(pct_event_division)
+            
         woe.append(woe_val)
         
         iv_val = (pct_non_event - pct_event) * woe_val

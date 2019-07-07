@@ -6,16 +6,13 @@
 # Stock market return index of Brazil (BOVESPA)
 # MSCI European index (EU)
 # MSCI emerging markets index (EM)
-# affect the New York Stock Exchange (NewYork_SP500), and also to try
-# to predict the value of the New York Stock Exchange for a given 
-# combination of the variables above.
+# affect the New York Stock Exchange (NewYork_SP500)
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import helpers as hp
 from scipy.stats import kurtosis, skew
 import pylab
-
 
 # constants used throughout the script
 # any change here will not affect the execution of the script
@@ -26,14 +23,13 @@ JAPAN_INDEX = 'NIKKEI'
 BRAZIL_INDEX = 'BOVESPA'
 EU_INDEX = 'EU'
 EM_INDEX = 'EM'
-
 MISSING_CONST = 'missing'
 
 plotting_enabled = True
+outlier_removal_enabled = False
 
 # configuring plotting options
 plt.style.use('ggplot')
-#figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
 
 # removing 3 variables from the data set since they won't be used for calculation:
 # [0] date 
@@ -182,9 +178,7 @@ if plotting_enabled:
     pylab.scatter(mainDataFrame.BOVESPA.index, mainDataFrame.BOVESPA)
     pylab.scatter(mainDataFrame.DAX.index, mainDataFrame.DAX)
     pylab.scatter(mainDataFrame.EU.index, mainDataFrame.EU)
-        
-    # pausing the thread to make sure the plots paint themselves
-    # before the correlation calculation
+    pylab.legend()
     plt.pause(1)
 
 print("*********** CORRELATION: **************")
@@ -201,11 +195,9 @@ for item in correlation_Array:
 
 print()
 
-# TODO: check if the payoff of removing outliers and NaN's is worth it
-# considering we lose a significant amount of data
-#mainDataFrame = hp.remove_outliers(mainDataFrame)
-#print(mainDataFrame.head(5))
-#print(mainDataFrame.tail(5))
+# remove outliers
+if(outlier_removal_enabled): 
+    mainDataFrame = hp.remove_outliers(mainDataFrame)
 
 print("*********** SKEWNESS: **************")
 print("*Feature: " + NEW_YORK_INDEX)
@@ -219,6 +211,8 @@ print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) +
       " => distribution is very close to the Bell curve")
 print()
 
-iv_tuple = hp.generate_iv_df(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
-print(iv_tuple[0])
-print('Total: ' + str(iv_tuple[1]))
+print("*********** INFORMATION VALUE & WEIGHT OF EVIDENCE: **************")
+print("*Dependent variable: " + NEW_YORK_INDEX)
+print ()
+
+hp.print_iv_data(mainDataFrame, NEW_YORK_INDEX)
