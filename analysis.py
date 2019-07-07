@@ -1,15 +1,3 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import helpers as ut
-from scipy.stats import kurtosis, skew
-from sklearn import linear_model
-from sklearn.metrics import mean_squared_error, r2_score
-import numpy as np
-import pylab
-import sys
-from scipy.stats import zscore
-#from matplotlib.pyplot import figure
-
 # The goal of this script is to analyze the stock market data and answer the 
 # question how variables 
 # Stock market return index of Germany (DAX)
@@ -21,6 +9,13 @@ from scipy.stats import zscore
 # affect the New York Stock Exchange (NewYork_SP500), and also to try
 # to predict the value of the New York Stock Exchange for a given 
 # combination of the variables above.
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import helpers as hp
+from scipy.stats import kurtosis, skew
+import pylab
+
 
 # constants used throughout the script
 # any change here will not affect the execution of the script
@@ -34,7 +29,7 @@ EM_INDEX = 'EM'
 
 MISSING_CONST = 'missing'
 
-plotting_enabled = False
+plotting_enabled = True
 
 # configuring plotting options
 plt.style.use('ggplot')
@@ -117,7 +112,7 @@ print()
 # at this point some series are interpreted as type object 
 # even though the result of describe method says float64,
 # so we're using a utility method to convert them all to float64's
-mainDataFrame = ut.convert_columns_to_numeric(mainDataFrame)
+mainDataFrame = hp.convert_columns_to_numeric(mainDataFrame)
 
 print("*********** STATISTICS: *************")
 print("Feature: " + NEW_YORK_INDEX)
@@ -150,7 +145,7 @@ print("Z-score: ")
 # zscore_group[0]['group'][0] are zscores for a specific series with a value less than -3
 # zscore_group[0]['group'][1] are zscores for a specific series with a value between -3 and 3
 # zscore_group[0]['group'][2] are zscores for a specific series with a value greater than 3
-zscore_groups = ut.generate_zscore_groups(mainDataFrame)
+zscore_groups = hp.generate_zscore_groups(mainDataFrame)
 
 for i in range(len(zscore_groups)):
     print(zscore_groups[i]['name'])
@@ -163,22 +158,26 @@ print()
 
 if plotting_enabled:
     print("*********** PLOTTING: *************")
-    print()
     print("*********** BOX PLOT: *************")
-    print("*Feature: NewYork_SP500*")
+    print("*Feature: " + NEW_YORK_INDEX)
+    
     # boxplot
     mainDataFrame.boxplot(figsize=(11,7))
     print()
     
-    # histogram
-    # print("***********HISTOGRAM: *************")
-    # ut.histogram_foreach_column(mainDataFrame)
     # pausing the thread to make sure the plots paint themselves
     # before the correlation calculation
     plt.pause(1)
     
+    # histogram
+    print("***********HISTOGRAM: *************")
+    hp.histogram_foreach_column(mainDataFrame)
+    print()
+    
+    plt.pause(1)
+    
     # scatter
-    print("*********** SCATTER PLOT: (NewYork_SP500, BOVESPA, DAX, EU) **************")
+    print("*********** SCATTER PLOT **********")
     pylab.scatter(mainDataFrame.NewYork_SP500.index, mainDataFrame.NewYork_SP500)
     pylab.scatter(mainDataFrame.BOVESPA.index, mainDataFrame.BOVESPA)
     pylab.scatter(mainDataFrame.DAX.index, mainDataFrame.DAX)
@@ -189,9 +188,9 @@ if plotting_enabled:
     plt.pause(1)
 
 print("*********** CORRELATION: **************")
-print("*Feature: NewYork_SP500*")
+print("*Feature: " + NEW_YORK_INDEX)
 print()
-correlation_Array = ut.get_correlation_with_other_columns(mainDataFrame.NewYork_SP500, mainDataFrame)
+correlation_Array = hp.get_correlation_with_other_columns(mainDataFrame.NewYork_SP500, mainDataFrame)
 
 # sorting the array ASC by the correlation value
 correlation_Array.sort(key=lambda tup: tup[1], reverse = True)
@@ -204,24 +203,22 @@ print()
 
 # TODO: check if the payoff of removing outliers and NaN's is worth it
 # considering we lose a significant amount of data
-#mainDataFrame = ut.remove_outliers(mainDataFrame)
+#mainDataFrame = hp.remove_outliers(mainDataFrame)
 #print(mainDataFrame.head(5))
 #print(mainDataFrame.tail(5))
 
 print("*********** SKEWNESS: **************")
-print("*Feature: NewYork_SP500*")
+print("*Feature: " + NEW_YORK_INDEX)
 print("ALPHA3 equals: " + str(skew(mainDataFrame.NewYork_SP500)) + 
       " => distribution is approximately symmetric")
 print()
 
 print("*********** KURTOSIS: **************")
-print("*Feature: NewYork_SP500*")
+print("*Feature: " + NEW_YORK_INDEX)
 print("ALPHA4 equals: " + str(kurtosis(mainDataFrame.NewYork_SP500)) + 
       " => distribution is very close to the Bell curve")
 print()
 
-ut.generate_iv_df(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
-#binned_tuple_collection = ut.get_binned_tuple_of_series(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
-#newdf = ut.convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection)
-#yes_series = newdf['Churn'].where(lambda cell : cell == 'Yes').dropna()
-#print(len(yes_series.values))
+iv_tuple = hp.generate_iv_df(mainDataFrame[NEW_YORK_INDEX], mainDataFrame[GERMANY_INDEX])
+print(iv_tuple[0])
+print('Total: ' + str(iv_tuple[1]))

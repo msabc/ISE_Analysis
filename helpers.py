@@ -3,6 +3,19 @@ import numpy as np
 import matplotlib.cm as cm
 from scipy.stats import zscore
 
+CONST_bin_number = 'Bin Number'
+CONST_events = 'Events'
+CONST_non_events = 'Non Events'
+CONST_name = 'name'
+CONST_group = 'group'
+CONST_event_y_n = 'Event (Yes/No)'
+CONST_pct_non_events = '% Non Events'
+CONST_pct_events = '% Events'
+CONST_woe = 'WOE'
+CONST_iv = 'IV'
+CONST_y = 'Yes'
+CONST_n = 'No'
+
 # General
 def generate_colors(n:int):
     colors = cm.rainbow(np.linspace(0, 1, n))
@@ -91,29 +104,76 @@ def generate_zscore_groups(dataFrame: pd.DataFrame):
         zscore_data_array.append(zscore(dataFrame[column]))
         dataframe_series_names.append(column)
     for i in range(len(zscore_data_array)):
-        zscore_groups.append({'name': dataframe_series_names[i], 'group': group_zscores(zscore_data_array[i])})
+        zscore_groups.append({
+                CONST_name: dataframe_series_names[i], 
+                CONST_group: group_zscores(zscore_data_array[i])
+                })
     return zscore_groups
 
+# Information Value and Weight of Evidence
 def generate_iv_df(s1: pd.Series, s2: pd.Series):
     newDf = create_intermediary_iv_df(s1, s2)
-    non_events = newDf['Non events']
-    total = non_events.sum()
-    print(total)
+    bin_num = newDf[CONST_bin_number]
+    non_events = newDf[CONST_non_events]
+    events = newDf[CONST_events]
+    total_non_events = non_events.sum()
+    total_events = events.sum()
+    
+    iter_count = len(bin_num.values)
+    
+    pct_non_events = []
+    pct_events = []
+    woe = []
+    iv = []
+    total_iv = 0
+    for i in range(0, iter_count):
+        curr_non_event_num = non_events.values[i]
+        pct_non_event = curr_non_event_num / total_non_events
+        pct_non_events.append(pct_non_event)
+        
+        curr_event_num = events.values[i]
+        pct_event = curr_event_num / total_events
+        pct_events.append(pct_event)
+        
+        woe_val = np.log(pct_non_event / pct_event)
+        woe.append(woe_val)
+        
+        iv_val = (pct_non_event - pct_event) * woe_val
+        iv.append(iv_val)
+        
+        total_iv += iv_val
+    
+    series_pct_non_events = pd.Series(pct_non_events)
+    series_pct_events = pd.Series(pct_events)
+    series_woe = pd.Series(woe)
+    series_iv = pd.Series(iv)
+    
+    frame = { 
+            CONST_bin_number: bin_num, 
+            CONST_non_events: non_events, 
+            CONST_events: events, 
+            CONST_pct_non_events: series_pct_non_events,
+            CONST_pct_events: series_pct_events,
+            CONST_woe: series_woe,
+            CONST_iv: series_iv
+            } 
+    
+    iv_dataFrame = pd.DataFrame(frame)
+    return (iv_dataFrame, total_iv)
 
-# Information Value and Weight of Evidence
 def create_intermediary_iv_df(s1: pd.Series, s2: pd.Series):
     binned_tuple_collection = get_binned_tuple_of_series(s1, s2)
     df = convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection)
-    num_of_bins = len(df['Bin Number'].unique())
+    num_of_bins = len(df[CONST_bin_number].unique())
     
     bins = []
     non_events = []
     events = []
     for i in range (0, num_of_bins):
-        bool_extract_bin_number = df['Bin Number'] == i
+        bool_extract_bin_number = df[CONST_bin_number] == i
         newDf = df[bool_extract_bin_number]
         total_num_rows = newDf.shape[0]
-        churn_number = len(newDf['Churn'].where(lambda x : x == 'Yes').dropna())
+        churn_number = len(newDf[CONST_event_y_n].where(lambda x : x == CONST_y).dropna())
         non_churn_number = total_num_rows - churn_number
         
         bins.append(i)
@@ -124,9 +184,10 @@ def create_intermediary_iv_df(s1: pd.Series, s2: pd.Series):
     non_events_series = pd.Series(non_events)
     events_series = pd.Series(events)
     
-    frame = { 'Bin Number': bin_series, 
-             'Non events': non_events_series, 
-             'Events': events_series} 
+    frame = { 
+            CONST_bin_number: bin_series, 
+            CONST_non_events: non_events_series, 
+            CONST_events: events_series} 
     
     return pd.DataFrame(frame)
 
@@ -155,10 +216,11 @@ def get_binned_tuple_of_series(s1: pd.Series, s2: pd.Series):
             first_bin_value = bins_s1[i][j]
             second_bin_value = bins_s2[i][j]
             
-            if((first_bin_value > 0 and second_bin_value > 0) or (first_bin_value < 0 and second_bin_value < 0)):
-                value_tuple = (bin_number, first_bin_value, second_bin_value, 'Yes')
+            if((first_bin_value > 0 and second_bin_value > 0) or 
+               (first_bin_value < 0 and second_bin_value < 0)):
+                value_tuple = (bin_number, first_bin_value, second_bin_value, CONST_y)
             else:
-                value_tuple = (bin_number, first_bin_value, second_bin_value, 'No')
+                value_tuple = (bin_number, first_bin_value, second_bin_value, CONST_n)
             tuple_collection.append(value_tuple)
     
     return tuple_collection
@@ -192,7 +254,12 @@ def convert_binned_tuple_collection_to_DataFrame(binned_tuple_collection):
     s2 = pd.Series(s2_values)
     s3 = pd.Series(churn_nonchurn_values)
     
-    frame = { 'Bin Number': bin_num_vals, 'Series_1': s1, 'Series_2': s2, 'Churn': s3} 
+    frame = { 
+            CONST_bin_number: bin_num_vals, 
+            'Series_1': s1, 
+            'Series_2': s2, 
+            CONST_event_y_n: s3
+            } 
     return pd.DataFrame(frame) 
     
     
