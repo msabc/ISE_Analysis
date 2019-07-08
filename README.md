@@ -1,8 +1,13 @@
 # ISE_Analysis
-Data set analysis for a machine learning course.
+Data set analysis of the *Istanbul Stock Exchange* dataset for a machine learning course.
 
 ## To Run
 Clone the project and run **python analysis.py**.
+
+## Configure
+2 constants defined inside **analysis.py** are configurable:
+1) plotting_enabled (*bool*) - True if plots should be displayed, false otherwise.
+2) outlier_removal_enabled (*bool*) - True if outliers are to be removed from the original dataset, false otherwise.
 
 ### About
 Data file is **data_ise.csv**.
