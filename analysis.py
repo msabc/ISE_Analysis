@@ -1,12 +1,13 @@
 # The goal of this script is to analyze the stock market data and answer the 
-# question how variables 
+# question of how much power the variables 
 # Stock market return index of Germany (DAX)
 # Stock market return index of UK (FTSE)
 # Stock market return index of Japan (NIKKEI)
 # Stock market return index of Brazil (BOVESPA)
 # MSCI European index (EU)
 # MSCI emerging markets index (EM)
-# affect the New York Stock Exchange (NewYork_SP500)
+# have in predicting the value of
+# the New York Stock Exchange (NewYork_SP500).
 
 import pandas as pd
 import matplotlib.pyplot as plt
